@@ -11,7 +11,6 @@ mod record;
 #[command(author, version, about, long_about = None)]
 struct Args {
     // The domain name to lookup
-    #[arg(short, long)]
     name: String,
 
     // The record type
