@@ -5,6 +5,7 @@ use anyhow::{anyhow, Result};
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 use std::io::{Cursor, Read, Seek, SeekFrom};
+use std::iter;
 use std::net::UdpSocket;
 
 pub(crate) const TYPE_A: u16 = 1;
@@ -20,9 +21,12 @@ pub(crate) fn try_encode_dns_name(str: &str) -> Result<Vec<u8>> {
         .split('.')
         .map(try_encode_domain_label)
         .collect::<Result<Vec<_>, _>>()?;
-    let mut encoded = parts.into_iter().flatten().collect::<Vec<u8>>();
-    encoded.push(0);
-    Ok(encoded)
+    // Byte 0 indicates end
+    Ok(parts
+        .into_iter()
+        .flatten()
+        .chain(iter::once(0))
+        .collect::<Vec<u8>>())
 }
 
 pub(crate) fn parse_name(value: &mut Cursor<&[u8]>) -> Result<Vec<u8>> {
@@ -69,11 +73,9 @@ fn try_encode_domain_label(part: &str) -> Result<Vec<u8>> {
     if part_len > 63 {
         return Err(anyhow!("domain part cannot be longer than 63 characters"));
     }
-    // We encode the part itself plus its length
-    let mut v = Vec::with_capacity(part_len + 1);
-    v.push(part_len as u8);
-    v.extend_from_slice(part.as_bytes());
-    Ok(v)
+    Ok(iter::once(part_len as u8)
+        .chain(part.as_bytes().iter().copied())
+        .collect())
 }
 
 pub(crate) fn build_query(domain_name: &str, record_type: u16) -> Result<Vec<u8>> {
@@ -84,9 +86,12 @@ pub(crate) fn build_query(domain_name: &str, record_type: u16) -> Result<Vec<u8>
         .with_id(id)
         .with_flags(0)
         .with_num_questions(1);
-    let mut query = header.to_bytes();
-    query.extend(question.to_bytes());
-    Ok(query)
+    Ok(header
+        .to_bytes()
+        .iter()
+        .copied()
+        .chain(question.to_bytes().iter().copied())
+        .collect())
 }
 
 pub(crate) fn read_u8<R: Read>(value: &mut R) -> Result<u8> {
@@ -107,9 +112,9 @@ pub(crate) fn read_u32<R: Read>(value: &mut R) -> Result<u32> {
     Ok(u32::from_be_bytes(buf))
 }
 
-pub(crate) fn read_n_bytes<R: Read>(value: &mut R, data_len: u64) -> Result<Vec<u8>> {
+pub(crate) fn read_n_bytes<R: Read>(value: &mut R, n: u64) -> Result<Vec<u8>> {
     let mut data = vec![];
-    value.take(data_len).read_to_end(&mut data)?;
+    value.take(n).read_to_end(&mut data)?;
     Ok(data)
 }
 
