@@ -1,4 +1,5 @@
 use crate::core::{read_u16, ToBytes};
+use anyhow::Result;
 use std::io::Cursor;
 
 #[derive(Debug, Default)]
@@ -58,7 +59,7 @@ impl ToBytes for DNSHeader {
     }
 }
 
-pub(crate) fn parse_header(value: &mut Cursor<&[u8]>) -> Result<DNSHeader, ()> {
+pub(crate) fn parse_header(value: &mut Cursor<&[u8]>) -> Result<DNSHeader> {
     let id = read_u16(value)?;
     let flags = read_u16(value)?;
     let num_questions = read_u16(value)?;

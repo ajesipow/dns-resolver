@@ -1,4 +1,4 @@
-use crate::core::lookup_domain;
+use crate::core::{resolve, TYPE_A};
 
 mod core;
 mod header;
@@ -15,7 +15,7 @@ fn main() {
         "www.metafilter.com",
     ];
     for domain in domains {
-        let ip = lookup_domain(domain);
-        println!("{domain}: {ip}");
+        let response = resolve(domain, TYPE_A).unwrap();
+        println!("{} is at {}", domain, response);
     }
 }

@@ -1,4 +1,5 @@
 use crate::core::{parse_name, read_u16, ToBytes};
+use anyhow::Result;
 use std::io::Cursor;
 
 #[derive(Debug)]
@@ -22,7 +23,7 @@ impl ToBytes for DNSQuestion {
     }
 }
 
-pub(crate) fn parse_question(value: &mut Cursor<&[u8]>) -> Result<DNSQuestion, ()> {
+pub(crate) fn parse_question(value: &mut Cursor<&[u8]>) -> Result<DNSQuestion> {
     let name = parse_name(value)?;
     let class = read_u16(value)?;
     let type_ = read_u16(value)?;
