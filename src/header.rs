@@ -27,21 +27,6 @@ impl DNSHeader {
         self.num_questions = num_questions;
         self
     }
-
-    pub fn with_num_answers(mut self, num_answers: u16) -> Self {
-        self.num_answers = num_answers;
-        self
-    }
-
-    pub fn with_num_authorities(mut self, num_authorities: u16) -> Self {
-        self.num_authorities = num_authorities;
-        self
-    }
-
-    pub fn with_num_additionals(mut self, num_additionals: u16) -> Self {
-        self.num_additionals = num_additionals;
-        self
-    }
 }
 
 impl ToBytes for DNSHeader {

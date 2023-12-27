@@ -6,8 +6,8 @@ use std::io::Cursor;
 
 #[derive(Debug)]
 pub(crate) struct DNSPacket {
-    pub header: DNSHeader,
-    pub questions: Vec<DNSQuestion>,
+    pub _header: DNSHeader,
+    pub _questions: Vec<DNSQuestion>,
     pub answers: Vec<DNSRecord>,
     pub authorities: Vec<DNSRecord>,
     pub additionals: Vec<DNSRecord>,
@@ -29,8 +29,8 @@ pub(crate) fn parse_dns_packet(value: &[u8]) -> Result<DNSPacket> {
         .map(|_| parse_record(&mut cursor))
         .collect::<Result<Vec<_>, _>>()?;
     Ok(DNSPacket {
-        header,
-        questions,
+        _header: header,
+        _questions: questions,
         answers,
         authorities,
         additionals,

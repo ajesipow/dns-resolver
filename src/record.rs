@@ -4,10 +4,10 @@ use std::io::Cursor;
 
 #[derive(Debug)]
 pub(crate) struct DNSRecord {
-    pub name: Vec<u8>,
+    pub _name: Vec<u8>,
     pub type_: u16,
-    pub class: u16,
-    pub ttl: u32,
+    pub _class: u16,
+    pub _ttl: u32,
     pub data: Vec<u8>,
 }
 
@@ -24,10 +24,10 @@ pub(crate) fn parse_record(value: &mut Cursor<&[u8]>) -> Result<DNSRecord> {
     }?;
 
     Ok(DNSRecord {
-        name,
+        _name: name,
         type_,
-        class,
-        ttl,
+        _class: class,
+        _ttl: ttl,
         data,
     })
 }
