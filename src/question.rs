@@ -1,8 +1,8 @@
-use std::io::Read;
+use std::io::Cursor;
 
 use anyhow::Result;
 
-use crate::core::parse_name;
+use crate::core::decode_name;
 use crate::core::read_u16;
 use crate::core::ToBytes;
 
@@ -22,8 +22,8 @@ impl DNSQuestion {
         Self { name, class, type_ }
     }
 
-    pub(crate) fn parse<R: Read>(value: &mut R) -> Result<Self> {
-        let name = parse_name(value)?;
+    pub(crate) fn parse(value: &mut Cursor<&[u8]>) -> Result<Self> {
+        let name = decode_name(value)?;
         let class = read_u16(value)?;
         let type_ = read_u16(value)?;
         Ok(Self { name, class, type_ })
