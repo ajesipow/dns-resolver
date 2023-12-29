@@ -1,6 +1,13 @@
-use crate::core::{decode_name, read_n_bytes, read_u16, read_u32, TYPE_A, TYPE_NS};
-use anyhow::Result;
 use std::io::Cursor;
+
+use anyhow::Result;
+
+use crate::core::decode_name;
+use crate::core::read_n_bytes;
+use crate::core::read_u16;
+use crate::core::read_u32;
+use crate::core::TYPE_A;
+use crate::core::TYPE_NS;
 
 #[derive(Debug)]
 pub(crate) struct DNSRecord {

@@ -1,6 +1,10 @@
-use crate::core::{parse_name, read_u16, ToBytes};
-use anyhow::Result;
 use std::io::Read;
+
+use anyhow::Result;
+
+use crate::core::parse_name;
+use crate::core::read_u16;
+use crate::core::ToBytes;
 
 #[derive(Debug)]
 pub(crate) struct DNSQuestion {
@@ -10,7 +14,11 @@ pub(crate) struct DNSQuestion {
 }
 
 impl DNSQuestion {
-    pub fn new(name: Vec<u8>, class: u16, type_: u16) -> Self {
+    pub fn new(
+        name: Vec<u8>,
+        class: u16,
+        type_: u16,
+    ) -> Self {
         Self { name, class, type_ }
     }
 

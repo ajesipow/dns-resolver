@@ -1,5 +1,7 @@
-use crate::core::{resolve, TYPE_A};
 use clap::Parser;
+
+use crate::core::resolve;
+use crate::core::TYPE_A;
 
 mod core;
 mod header;

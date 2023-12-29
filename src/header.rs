@@ -1,6 +1,9 @@
-use crate::core::{read_u16, ToBytes};
-use anyhow::Result;
 use std::io::Read;
+
+use anyhow::Result;
+
+use crate::core::read_u16;
+use crate::core::ToBytes;
 
 #[derive(Debug, Default)]
 pub(crate) struct DNSHeader {
@@ -30,17 +33,26 @@ impl DNSHeader {
         })
     }
 
-    pub fn with_id(mut self, id: u16) -> Self {
+    pub fn with_id(
+        mut self,
+        id: u16,
+    ) -> Self {
         self.id = id;
         self
     }
 
-    pub fn with_flags(mut self, flags: u16) -> Self {
+    pub fn with_flags(
+        mut self,
+        flags: u16,
+    ) -> Self {
         self.flags = flags;
         self
     }
 
-    pub fn with_num_questions(mut self, num_questions: u16) -> Self {
+    pub fn with_num_questions(
+        mut self,
+        num_questions: u16,
+    ) -> Self {
         self.num_questions = num_questions;
         self
     }

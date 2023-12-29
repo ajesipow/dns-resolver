@@ -1,12 +1,19 @@
+use std::io::Cursor;
+use std::io::Read;
+use std::io::Seek;
+use std::io::SeekFrom;
+use std::iter;
+use std::net::UdpSocket;
+
+use anyhow::anyhow;
+use anyhow::Result;
+use rand::rngs::SmallRng;
+use rand::Rng;
+use rand::SeedableRng;
+
 use crate::header::DNSHeader;
 use crate::packet::DNSPacket;
 use crate::question::DNSQuestion;
-use anyhow::{anyhow, Result};
-use rand::rngs::SmallRng;
-use rand::{Rng, SeedableRng};
-use std::io::{Cursor, Read, Seek, SeekFrom};
-use std::iter;
-use std::net::UdpSocket;
 
 pub(crate) const TYPE_A: u16 = 1;
 pub(crate) const TYPE_NS: u16 = 2;
@@ -58,7 +65,10 @@ pub(crate) fn decode_name(value: &mut Cursor<&[u8]>) -> Result<Vec<u8>> {
     Ok(name.join(&b'.'))
 }
 
-fn decode_compressed_name(value: &mut Cursor<&[u8]>, length: u8) -> Result<Vec<u8>> {
+fn decode_compressed_name(
+    value: &mut Cursor<&[u8]>,
+    length: u8,
+) -> Result<Vec<u8>> {
     let pointer_bytes = [length & 0b0011_1111, read_u8(value)?];
     let pointer = read_u16(&mut &pointer_bytes[..])?;
     let current_position = value.position();
@@ -78,7 +88,10 @@ fn try_encode_domain_label(part: &str) -> Result<Vec<u8>> {
         .collect())
 }
 
-pub(crate) fn build_query(domain_name: &str, record_type: u16) -> Result<Vec<u8>> {
+pub(crate) fn build_query(
+    domain_name: &str,
+    record_type: u16,
+) -> Result<Vec<u8>> {
     let encoded_domain_name = try_encode_dns_name(domain_name)?;
     let question = DNSQuestion::new(encoded_domain_name, CLASS_IN, record_type);
     let id = SmallRng::seed_from_u64(42).gen();
@@ -112,7 +125,10 @@ pub(crate) fn read_u32<R: Read>(value: &mut R) -> Result<u32> {
     Ok(u32::from_be_bytes(buf))
 }
 
-pub(crate) fn read_n_bytes<R: Read>(value: &mut R, n: u64) -> Result<Vec<u8>> {
+pub(crate) fn read_n_bytes<R: Read>(
+    value: &mut R,
+    n: u64,
+) -> Result<Vec<u8>> {
     let mut data = vec![];
     value.take(n).read_to_end(&mut data)?;
     Ok(data)
@@ -139,7 +155,10 @@ pub(crate) fn send_query(
     DNSPacket::parse(&buf)
 }
 
-pub(crate) fn resolve(domain_name: &str, record_type: u16) -> Result<String> {
+pub(crate) fn resolve(
+    domain_name: &str,
+    record_type: u16,
+) -> Result<String> {
     let mut nameserver = "198.41.0.4".to_string();
     loop {
         println!("Querying: {nameserver} for {domain_name}");

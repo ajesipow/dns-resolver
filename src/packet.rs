@@ -1,9 +1,12 @@
-use crate::core::{TYPE_A, TYPE_NS};
+use std::io::Cursor;
+
+use anyhow::Result;
+
+use crate::core::TYPE_A;
+use crate::core::TYPE_NS;
 use crate::header::DNSHeader;
 use crate::question::DNSQuestion;
 use crate::record::DNSRecord;
-use anyhow::Result;
-use std::io::Cursor;
 
 #[derive(Debug)]
 pub(crate) struct DNSPacket {
