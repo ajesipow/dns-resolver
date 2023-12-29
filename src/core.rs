@@ -1,5 +1,5 @@
 use crate::header::DNSHeader;
-use crate::packet::{parse_dns_packet, DNSPacket};
+use crate::packet::DNSPacket;
 use crate::question::DNSQuestion;
 use anyhow::{anyhow, Result};
 use rand::rngs::SmallRng;
@@ -136,35 +136,7 @@ pub(crate) fn send_query(
     socket.send_to(&query, format!("{ip_address}:53"))?;
     let mut buf = vec![0; 1024];
     socket.recv_from(&mut buf)?;
-    parse_dns_packet(&buf)
-}
-
-pub(crate) fn get_answer(packet: &DNSPacket) -> Option<&[u8]> {
-    for answer in packet.answers.iter() {
-        if answer.type_ == TYPE_A {
-            return Some(&answer.data);
-        }
-    }
-    None
-}
-
-pub(crate) fn get_nameserver_ip(packet: &DNSPacket) -> Option<&[u8]> {
-    for additional in packet.additionals.iter() {
-        if additional.type_ == TYPE_A {
-            return Some(&additional.data);
-        }
-    }
-    None
-}
-
-pub(crate) fn get_nameserver(packet: &DNSPacket) -> Result<Option<String>> {
-    for authority in packet.authorities.iter() {
-        if authority.type_ == TYPE_NS {
-            let nameserver = String::from_utf8(authority.data.clone())?;
-            return Ok(Some(nameserver));
-        }
-    }
-    Ok(None)
+    DNSPacket::parse(&buf)
 }
 
 pub(crate) fn resolve(domain_name: &str, record_type: u16) -> Result<String> {
@@ -172,13 +144,13 @@ pub(crate) fn resolve(domain_name: &str, record_type: u16) -> Result<String> {
     loop {
         println!("Querying: {nameserver} for {domain_name}");
         let packet = send_query(&nameserver, domain_name, record_type)?;
-        if let Some(raw_ip) = get_answer(&packet) {
+        if let Some(raw_ip) = packet.get_answer() {
             let answer = ip_to_string(raw_ip);
             return Ok(answer);
         }
-        if let Some(raw_ns_ip) = get_nameserver_ip(&packet) {
+        if let Some(raw_ns_ip) = packet.get_nameserver_ip() {
             nameserver = ip_to_string(raw_ns_ip);
-        } else if let Some(new_name_server) = get_nameserver(&packet)? {
+        } else if let Some(new_name_server) = packet.get_nameserver()? {
             nameserver = resolve(&new_name_server, TYPE_A)?;
         } else {
             return Err(anyhow!("should have found either answer, NS IP or NS name"));
