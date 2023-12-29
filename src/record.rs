@@ -11,23 +11,25 @@ pub(crate) struct DNSRecord {
     pub data: Vec<u8>,
 }
 
-pub(crate) fn parse_record(value: &mut Cursor<&[u8]>) -> Result<DNSRecord> {
-    let name = decode_name(value)?;
-    let type_ = read_u16(value)?;
-    let class = read_u16(value)?;
-    let ttl = read_u32(value)?;
-    let data_len = read_u16(value)?;
-    let data = match type_ {
-        TYPE_NS => decode_name(value),
-        TYPE_A => read_n_bytes(value, data_len as u64),
-        _ => read_n_bytes(value, data_len as u64),
-    }?;
+impl DNSRecord {
+    pub(crate) fn parse(value: &mut Cursor<&[u8]>) -> Result<DNSRecord> {
+        let name = decode_name(value)?;
+        let type_ = read_u16(value)?;
+        let class = read_u16(value)?;
+        let ttl = read_u32(value)?;
+        let data_len = read_u16(value)?;
+        let data = match type_ {
+            TYPE_NS => decode_name(value),
+            TYPE_A => read_n_bytes(value, data_len as u64),
+            _ => read_n_bytes(value, data_len as u64),
+        }?;
 
-    Ok(DNSRecord {
-        _name: name,
-        type_,
-        _class: class,
-        _ttl: ttl,
-        data,
-    })
+        Ok(DNSRecord {
+            _name: name,
+            type_,
+            _class: class,
+            _ttl: ttl,
+            data,
+        })
+    }
 }

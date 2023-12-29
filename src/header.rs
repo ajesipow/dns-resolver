@@ -1,6 +1,6 @@
 use crate::core::{read_u16, ToBytes};
 use anyhow::Result;
-use std::io::Cursor;
+use std::io::Read;
 
 #[derive(Debug, Default)]
 pub(crate) struct DNSHeader {
@@ -13,6 +13,23 @@ pub(crate) struct DNSHeader {
 }
 
 impl DNSHeader {
+    pub(crate) fn parse<R: Read>(value: &mut R) -> Result<Self> {
+        let id = read_u16(value)?;
+        let flags = read_u16(value)?;
+        let num_questions = read_u16(value)?;
+        let num_answers = read_u16(value)?;
+        let num_authorities = read_u16(value)?;
+        let num_additionals = read_u16(value)?;
+        Ok(Self {
+            id,
+            flags,
+            num_questions,
+            num_answers,
+            num_authorities,
+            num_additionals,
+        })
+    }
+
     pub fn with_id(mut self, id: u16) -> Self {
         self.id = id;
         self
@@ -42,21 +59,4 @@ impl ToBytes for DNSHeader {
         v.extend_from_slice(&self.num_additionals.to_be_bytes());
         v
     }
-}
-
-pub(crate) fn parse_header(value: &mut Cursor<&[u8]>) -> Result<DNSHeader> {
-    let id = read_u16(value)?;
-    let flags = read_u16(value)?;
-    let num_questions = read_u16(value)?;
-    let num_answers = read_u16(value)?;
-    let num_authorities = read_u16(value)?;
-    let num_additionals = read_u16(value)?;
-    Ok(DNSHeader {
-        id,
-        flags,
-        num_questions,
-        num_answers,
-        num_authorities,
-        num_additionals,
-    })
 }

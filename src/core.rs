@@ -29,7 +29,7 @@ pub(crate) fn try_encode_dns_name(str: &str) -> Result<Vec<u8>> {
         .collect::<Vec<u8>>())
 }
 
-pub(crate) fn parse_name(value: &mut Cursor<&[u8]>) -> Result<Vec<u8>> {
+pub(crate) fn parse_name<R: Read>(value: &mut R) -> Result<Vec<u8>> {
     let mut v = vec![];
     // Length must be > 0
     while let Ok(length @ 1..) = read_u8(value) {

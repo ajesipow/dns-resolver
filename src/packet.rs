@@ -1,7 +1,7 @@
 use crate::core::{TYPE_A, TYPE_NS};
-use crate::header::{parse_header, DNSHeader};
-use crate::question::{parse_question, DNSQuestion};
-use crate::record::{parse_record, DNSRecord};
+use crate::header::DNSHeader;
+use crate::question::DNSQuestion;
+use crate::record::DNSRecord;
 use anyhow::Result;
 use std::io::Cursor;
 
@@ -17,18 +17,18 @@ pub(crate) struct DNSPacket {
 impl DNSPacket {
     pub(crate) fn parse(value: &[u8]) -> Result<Self> {
         let mut cursor = Cursor::new(value);
-        let header = parse_header(&mut cursor)?;
+        let header = DNSHeader::parse(&mut cursor)?;
         let questions: Vec<DNSQuestion> = (0..header.num_questions)
-            .map(|_| parse_question(&mut cursor))
+            .map(|_| DNSQuestion::parse(&mut cursor))
             .collect::<Result<Vec<_>, _>>()?;
         let answers: Vec<DNSRecord> = (0..header.num_answers)
-            .map(|_| parse_record(&mut cursor))
+            .map(|_| DNSRecord::parse(&mut cursor))
             .collect::<Result<Vec<_>, _>>()?;
         let authorities: Vec<DNSRecord> = (0..header.num_authorities)
-            .map(|_| parse_record(&mut cursor))
+            .map(|_| DNSRecord::parse(&mut cursor))
             .collect::<Result<Vec<_>, _>>()?;
         let additionals: Vec<DNSRecord> = (0..header.num_additionals)
-            .map(|_| parse_record(&mut cursor))
+            .map(|_| DNSRecord::parse(&mut cursor))
             .collect::<Result<Vec<_>, _>>()?;
         Ok(Self {
             _header: header,

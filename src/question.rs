@@ -1,6 +1,6 @@
 use crate::core::{parse_name, read_u16, ToBytes};
 use anyhow::Result;
-use std::io::Cursor;
+use std::io::Read;
 
 #[derive(Debug)]
 pub(crate) struct DNSQuestion {
@@ -13,6 +13,13 @@ impl DNSQuestion {
     pub fn new(name: Vec<u8>, class: u16, type_: u16) -> Self {
         Self { name, class, type_ }
     }
+
+    pub(crate) fn parse<R: Read>(value: &mut R) -> Result<Self> {
+        let name = parse_name(value)?;
+        let class = read_u16(value)?;
+        let type_ = read_u16(value)?;
+        Ok(Self { name, class, type_ })
+    }
 }
 
 impl ToBytes for DNSQuestion {
@@ -21,11 +28,4 @@ impl ToBytes for DNSQuestion {
         self.name.extend_from_slice(&self.type_.to_be_bytes());
         self.name
     }
-}
-
-pub(crate) fn parse_question(value: &mut Cursor<&[u8]>) -> Result<DNSQuestion> {
-    let name = parse_name(value)?;
-    let class = read_u16(value)?;
-    let type_ = read_u16(value)?;
-    Ok(DNSQuestion { name, class, type_ })
 }
